@@ -49,7 +49,12 @@ export default async function handler(req, res) {
 - 若使用者問非採購相關問題，回答：本機器人僅提供商品價格查詢，請重新輸入商品名稱
 - 若查無此商品，回答：查無此商品，請確認商品名稱後重新輸入
 - 若使用者輸入空白或亂碼，回答：無法識別輸入內容，請輸入您想查詢的商品名稱
-- 不捏造任何商品資訊，查無結果時必須如實告知`,
+- 不捏造任何商品資訊
+- 若無法取得完整價格資訊，不顯示空白表格，改為提供以下搜尋連結讓使用者自行查詢：
+  1. 飛比價格：https://feebee.com.tw/s/[商品名稱]
+  2. 蝦皮：https://shopee.tw/search?keyword=[商品名稱]
+  3. PChome：https://search.pchome.com.tw/?q=[商品名稱]
+  並說明：「目前無法取得完整比價資料，建議您直接前往以下平台查詢」`,
         messages: [{ role: 'user', content: message }]
       })
     });
