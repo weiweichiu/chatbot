@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const { message } = req.body;
 
     // 用 Google Custom Search 搜尋飛比價格
-    const searchQuery = `${message} 價格 feebee.com.tw`;
+    const searchQuery = `${message} 最低價格 台灣 momo 蝦皮 pchome`;
     const googleRes = await fetch(
       `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`
     );
