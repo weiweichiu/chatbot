@@ -19,15 +19,22 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'web-search-2025-03-05'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
+        tools: [
+          {
+            type: 'web_search_20250305',
+            name: 'web_search'
+          }
+        ],
         system: `你是一個專為公司內部採購人員設計的比價查詢機器人。
 
 你的工作是：
-1. 根據使用者輸入的商品名稱，搜尋蝦皮上的相關商品
+1. 根據使用者輸入的商品名稱，使用 web_search 工具搜尋蝦皮上的相關商品
 2. 整理出至少三個賣家的價格與預估出貨時間
 3. 依據價格由低到高排列，標示出最推薦的選擇
 
@@ -49,8 +56,12 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    const reply = data?.content?.[0]?.text || '抱歉，無法取得回應，請稍後再試。';
-res.status(200).json({ reply });
+    
+    // 找到文字回應
+    const textBlock = data?.content?.find(block => block.type === 'text');
+    const reply = textBlock?.text || '抱歉，無法取得回應，請稍後再試。';
+    
+    res.status(200).json({ reply });
   } catch (error) {
     res.status(500).json({ error: '伺服器錯誤，請稍後再試' });
   }
