@@ -14,39 +14,30 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body;
 
-    // 用 Google Custom Search 搜尋飛比價格
-    const searchQuery = `${message} 最低價格 台灣 momo 蝦皮 pchome`;
-    const googleRes = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`
-    );
-    const googleData = await googleRes.json();
-    
-    // 整理搜尋結果
-    const searchResults = googleData.items?.map(item => ({
-      title: item.title,
-      snippet: item.snippet,
-      link: item.link
-    })) || [];
-
-    // 把搜尋結果傳給 Claude 整理
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'web-search-2025-03-05'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4000,
+        tools: [
+          {
+            type: 'web_search_20250305',
+            name: 'web_search'
+          }
+        ],
         system: `你是一個專為公司內部採購人員設計的比價查詢機器人。
 
-你會收到飛比價格的 Google 搜尋結果，請從中整理出商品價格資訊。
-
 你的工作是：
-1. 從搜尋結果的 snippet 中找出有完整價格（數字+$或元）的賣家，最多顯示前3名
-2. 依據價格由低到高排列，第1名標示為最推薦
-3. 若只找到1~2筆有價格的資料，直接顯示找到的筆數
+1. 根據使用者輸入的商品名稱，搜尋飛比價格、BigGo、momo、PChome 等平台的商品價格資訊
+2. 整理出能找到的賣家與對應價格，最多顯示前3名
+3. 依據價格由低到高排列，第1名標示為最推薦
+4. 若只找到1~2筆有價格的資料，直接顯示找到的筆數
 
 回答格式如下：
 商品：[商品名稱]
@@ -65,10 +56,7 @@ export default async function handler(req, res) {
   2. 蝦皮：https://shopee.tw/search?keyword=[商品名稱]
   3. PChome：https://search.pchome.com.tw/?q=[商品名稱]
   並說明：「目前無法取得完整比價資料，建議您直接前往以下平台查詢」`,
-        messages: [{
-          role: 'user',
-          content: `使用者查詢：${message}\n\nGoogle 搜尋結果（來自飛比價格）：\n${JSON.stringify(searchResults, null, 2)}`
-        }]
+        messages: [{ role: 'user', content: message }]
       })
     });
 
