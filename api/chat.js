@@ -14,8 +14,8 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body;
 
-    // 先用 Google Custom Search 查詢價格
-    const searchQuery = `${message} 價格`;
+    // 用 Google Custom Search 搜尋飛比價格
+    const searchQuery = `${message} 價格 feebee.com.tw`;
     const googleRes = await fetch(
       `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(searchQuery)}&num=10`
     );
@@ -41,10 +41,10 @@ export default async function handler(req, res) {
         max_tokens: 4000,
         system: `你是一個專為公司內部採購人員設計的比價查詢機器人。
 
-你會收到 Google 搜尋結果，請從中整理出商品價格資訊。
+你會收到飛比價格的 Google 搜尋結果，請從中整理出商品價格資訊。
 
 你的工作是：
-1. 從搜尋結果中找出有完整價格的賣家，最多顯示前3名
+1. 從搜尋結果的 snippet 中找出有完整價格（數字+$或元）的賣家，最多顯示前3名
 2. 依據價格由低到高排列，第1名標示為最推薦
 3. 若只找到1~2筆有價格的資料，直接顯示找到的筆數
 
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
   並說明：「目前無法取得完整比價資料，建議您直接前往以下平台查詢」`,
         messages: [{
           role: 'user',
-          content: `使用者查詢：${message}\n\nGoogle 搜尋結果：\n${JSON.stringify(searchResults, null, 2)}`
+          content: `使用者查詢：${message}\n\nGoogle 搜尋結果（來自飛比價格）：\n${JSON.stringify(searchResults, null, 2)}`
         }]
       })
     });
