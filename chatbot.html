@@ -72,7 +72,7 @@
 <body>
   <h1>🛒 採購比價機器人</h1>
   <div id="chat-box">
-    <div class="message bot">👋 您好！我是採購比價機器人，請輸入您想查詢的商品名稱，我會幫您搜尋蝦皮上的價格與出貨時間。</div>
+    <div class="message bot">👋 您好！我是採購比價機器人，請輸入您想查詢的商品名稱，我會幫您搜尋飛比價格、BigGo、momo、PChome 等平台的價格與出貨時間。</div>
   </div>
   <div id="input-area">
     <input type="text" id="user-input" placeholder="例如：義美小泡芙" />
@@ -95,7 +95,7 @@
       const loadingDiv = document.createElement("div");
       loadingDiv.className = "message bot";
       loadingDiv.id = "loading";
-      loadingDiv.textContent = "⏳ 正在搜尋蝦皮，請稍候...";
+      loadingDiv.textContent = "⏳ 正在搜尋飛比價格、BigGo、momo、PChome，請稍候...";
       chatBox.appendChild(loadingDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
 
