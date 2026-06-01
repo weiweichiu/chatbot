@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>採購比價機器人</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,20 +17,36 @@
       background: white;
       border-radius: 10px;
       padding: 20px;
-      height: 400px;
+      height: 500px;
       overflow-y: auto;
       margin-bottom: 20px;
       border: 1px solid #ddd;
     }
     .message { margin-bottom: 15px; }
-    .user { text-align: right; color: #0066cc; }
+    .user { text-align: right; color: #0066cc; font-weight: bold; }
     .bot {
       text-align: left;
       color: #333;
       background: #f0f0f0;
-      padding: 10px;
+      padding: 15px;
       border-radius: 8px;
-      white-space: pre-wrap;
+    }
+    .bot table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .bot table th, .bot table td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .bot table th {
+      background: #0066cc;
+      color: white;
+    }
+    .bot table tr:nth-child(even) {
+      background: #f9f9f9;
     }
     #input-area { display: flex; gap: 10px; }
     input[type="text"] {
@@ -49,6 +66,7 @@
       font-size: 16px;
     }
     button:hover { background: #0052a3; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -58,19 +76,27 @@
   </div>
   <div id="input-area">
     <input type="text" id="user-input" placeholder="例如：義美小泡芙" />
-    <button onclick="sendMessage()">送出</button>
+    <button id="send-btn" onclick="sendMessage()">送出</button>
   </div>
 
   <script>
     async function sendMessage() {
       const input = document.getElementById("user-input");
       const chatBox = document.getElementById("chat-box");
+      const btn = document.getElementById("send-btn");
       const userText = input.value.trim();
       if (!userText) return;
 
       chatBox.innerHTML += `<div class="message user">🧑 ${userText}</div>`;
       input.value = "";
-      chatBox.innerHTML += `<div class="message bot" id="loading">⏳ 查詢中，請稍候...</div>`;
+      btn.disabled = true;
+      btn.textContent = "查詢中...";
+      
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "message bot";
+      loadingDiv.id = "loading";
+      loadingDiv.textContent = "⏳ 正在搜尋蝦皮，請稍候...";
+      chatBox.appendChild(loadingDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
 
       try {
@@ -82,11 +108,18 @@
 
         const data = await response.json();
         document.getElementById("loading").remove();
-        chatBox.innerHTML += `<div class="message bot">🤖 ${data.reply}</div>`;
+        
+        const botDiv = document.createElement("div");
+        botDiv.className = "message bot";
+        botDiv.innerHTML = "🤖 " + marked.parse(data.reply || "抱歉，無法取得回應。");
+        chatBox.appendChild(botDiv);
       } catch (error) {
         document.getElementById("loading").remove();
         chatBox.innerHTML += `<div class="message bot">❌ 發生錯誤，請稍後再試。</div>`;
       }
+      
+      btn.disabled = false;
+      btn.textContent = "送出";
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
