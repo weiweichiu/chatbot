@@ -49,7 +49,8 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    res.status(200).json({ reply: data.content[0].text });
+    const reply = data?.content?.[0]?.text || '抱歉，無法取得回應，請稍後再試。';
+res.status(200).json({ reply });
   } catch (error) {
     res.status(500).json({ error: '伺服器錯誤，請稍後再試' });
   }
